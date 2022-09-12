@@ -1,21 +1,9 @@
-/* Example of how to use netlink to show ifconfig / ip address
- * information directly from C code.
- *
- * This will only work on platforms where netlink is available.
- *
- * Pungenday, the 45th day of Discord in the YOLD 3186
- *
- * Albert Veli
- *
- * License: LGPLv2 (same as libnl)
- */
 #include <stdio.h>
 #include <string.h>
 #include <net/if.h>
 #include <netlink/netlink.h>
 #include <netlink/route/addr.h>
 
-/* From libiproute2 (rt_names.c) */
 static char *rtnl_rtscope_tab[256] = {
 	[RT_SCOPE_UNIVERSE]  = "global",
 	[RT_SCOPE_NOWHERE]   = "nowhere",
@@ -24,7 +12,6 @@ static char *rtnl_rtscope_tab[256] = {
 	[RT_SCOPE_SITE]      = "site",
 };
 
-/* From libiproute2 (rt_names.c) */
 const char *rtnl_rtscope_n2a(int id, char *buf, int len)
 {
 	if (id < 0 || id >= 256) {
@@ -39,7 +26,6 @@ const char *rtnl_rtscope_n2a(int id, char *buf, int len)
 	return buf;
 }
 
-/* If !free, alloc nl_sock else free previously allocated one */
 static struct nl_sock *cached_nl_sock(int free)
 {
 	static struct nl_sock *sk = NULL;
@@ -52,11 +38,9 @@ static struct nl_sock *cached_nl_sock(int free)
 		return NULL;
 	}
 
-	/* Return cached nl_sock */
 	if (sk)
 		return sk;
 
-	/* Alloc and return new nl_sock */
 	sk = nl_socket_alloc();
 	if (!sk)
 		return NULL;
@@ -69,7 +53,6 @@ static struct nl_sock *cached_nl_sock(int free)
 	return sk;
 }
 
-/* callback for nl_cache_foreach, below */
 static void __addr_cb(struct nl_object *obj, void *data)
 {
 	char addrbuf[64];
@@ -121,11 +104,6 @@ static void __addr_cb(struct nl_object *obj, void *data)
 	printf("\n    %s %s%s scope %s", inetbuf, addrbuf, brdbuf2, p);
 }
 
-/* Loop through all interfaces and print if_index, if_name and IP address(es)
- *
- * Based on example code for man page if_nameindex
- * https://linux.die.net/man/3/if_nameindex
- */
 int print_ifaces(void)
 {
 	struct if_nameindex *if_ni, *i;
